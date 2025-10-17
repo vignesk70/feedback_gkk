@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GKK Questionnaire</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="client-app">
+      <header class="client-header">
+        <span class="logo-circle">GKK</span>
+        <h1 id="questionnaireTitle">Capability Diagnostic</h1>
+        <p id="questionnaireSubtitle">
+          Please complete the following questionnaire to help us tailor the right
+          development solutions for your teams.
+        </p>
+      </header>
+
+      <form id="questionnaireForm">
+        <section class="client-section">
+          <h2>Respondent Details</h2>
+          <p>
+            Provide your organisation and contact information so we can follow up
+            with tailored recommendations.
+          </p>
+          <div class="form-grid">
+            <div class="field" data-field="companyName">
+              <label for="companyName">Company Name *</label>
+              <input type="text" id="companyName" name="companyName" required />
+            </div>
+            <div class="field" data-field="industry">
+              <label for="industry">Industry *</label>
+              <input type="text" id="industry" name="industry" required />
+            </div>
+            <div class="field" data-field="respondentName">
+              <label for="respondentName">Respondent Name *</label>
+              <input type="text" id="respondentName" name="respondentName" required />
+            </div>
+            <div class="field" data-field="respondentEmail">
+              <label for="respondentEmail">Respondent Email *</label>
+              <input type="email" id="respondentEmail" name="respondentEmail" required />
+            </div>
+            <div class="field" data-field="respondentPhone">
+              <label for="respondentPhone">Respondent Phone (Optional)</label>
+              <input type="tel" id="respondentPhone" name="respondentPhone" />
+            </div>
+          </div>
+        </section>
+        <div id="clientSections"></div>
+        <div class="client-submit">
+          <button type="submit" class="primary-btn">Submit Responses</button>
+        </div>
+      </form>
+
+      <div id="feedbackBanner"></div>
+    </main>
+
+    <script src="client.js" type="module"></script>
+  </body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GKK Questionnaire Builder</title>
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="top-bar">
+        <div class="brand">
+          <span class="logo-circle">GKK</span>
+          <div class="brand-copy">
+            <h1>Questionnaire Builder</h1>
+            <p>
+              Design, preview, and publish your capability diagnostics for clients.
+            </p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button id="viewResponses" class="ghost-btn">
+            Download Responses
+          </button>
+          <button id="exportJson" class="ghost-btn">Export JSON</button>
+          <button id="loadSample" class="ghost-btn">Load Sample</button>
+          <button id="saveBuilder" class="primary-btn">
+            Save Questionnaire
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="panel panel--builder">
+          <div class="panel-header">
+            <h2>Structure</h2>
+            <button id="addSection" class="primary-btn">+ New Section</button>
+          </div>
+          <div id="sectionList" class="section-list"></div>
+        </section>
+
+        <section class="panel panel--preview">
+          <div class="panel-header">
+            <h2>Live Preview</h2>
+            <div class="panel-subtitle">
+              Preview updates automatically; remember to save to publish changes.
+            </div>
+          </div>
+          <div id="preview" class="preview"></div>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="sectionModal" class="modal">
+      <form method="dialog" class="modal-body" id="sectionForm">
+        <div class="modal-header">
+          <h3 id="sectionModalTitle">Section</h3>
+          <button type="button" class="icon-btn" data-close-modal>&times;</button>
+        </div>
+        <div class="field">
+          <label for="sectionTitle">Section Title</label>
+          <input type="text" id="sectionTitle" name="title" required />
+        </div>
+        <div class="field">
+          <label for="sectionCategory">Mapping / Pillar</label>
+          <input type="text" id="sectionCategory" name="category" />
+        </div>
+        <div class="field">
+          <label for="sectionSummary">Section Summary</label>
+          <textarea
+            id="sectionSummary"
+            name="summary"
+            rows="3"
+            placeholder="Highlight the focus and objectives for this section."
+          ></textarea>
+        </div>
+        <menu class="modal-actions">
+          <button type="submit" class="primary-btn">Save Section</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="questionModal" class="modal">
+      <form method="dialog" class="modal-body" id="questionForm">
+        <div class="modal-header">
+          <h3 id="questionModalTitle">Question</h3>
+          <button type="button" class="icon-btn" data-close-modal>&times;</button>
+        </div>
+        <div class="field">
+          <label for="questionPrompt">Prompt</label>
+          <textarea id="questionPrompt" name="prompt" rows="3" required></textarea>
+        </div>
+        <div class="field">
+          <label for="questionType">Response Type</label>
+          <select id="questionType" name="type">
+            <option value="single">Single Select</option>
+            <option value="multi">Multi Select</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Answer Options</label>
+          <div id="optionList" class="option-list"></div>
+          <button type="button" id="addOption" class="ghost-btn">+ Add Option</button>
+        </div>
+        <div class="field">
+          <label for="questionGuidance">Derivation Guidance</label>
+          <textarea
+            id="questionGuidance"
+            name="guidance"
+            rows="3"
+            placeholder="Describe how to interpret the responses."
+          ></textarea>
+        </div>
+        <menu class="modal-actions">
+          <button type="submit" class="primary-btn">Save Question</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="jsonModal" class="modal modal--wide">
+      <form method="dialog" class="modal-body">
+        <div class="modal-header">
+          <h3>Questionnaire JSON</h3>
+          <button type="button" class="icon-btn" data-close-modal>&times;</button>
+        </div>
+        <pre id="jsonPreview" class="json-preview"></pre>
+        <menu class="modal-actions">
+          <button type="submit" class="primary-btn">Close</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <div id="toastContainer"></div>
+
+    <script src="admin.js" type="module"></script>
+  </body>
+</html>
