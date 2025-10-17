@@ -9,6 +9,10 @@ const questionForm = document.getElementById("questionForm");
 const optionList = document.getElementById("optionList");
 const jsonPreview = document.getElementById("jsonPreview");
 const saveButton = document.getElementById("saveBuilder");
+const responsesModal = document.getElementById("responsesModal");
+const responsesContainer = document.getElementById("responsesContainer");
+const refreshResponsesButton = document.getElementById("refreshResponses");
+const downloadResponsesButton = document.getElementById("downloadResponses");
 
 const state = {
   questionnaire: {
@@ -22,6 +26,8 @@ const context = {
   sectionId: null,
   questionId: null,
 };
+
+let responsesCache = [];
 
 const sampleQuestionnaire = {
   title: "GKK Capability Diagnostic",
@@ -292,7 +298,28 @@ document
   .getElementById("loadSample")
   .addEventListener("click", () => loadSampleQuestionnaire());
 
-document.getElementById("viewResponses").addEventListener("click", downloadResponses);
+document.getElementById("viewResponses").addEventListener("click", openResponsesModal);
+
+if (refreshResponsesButton) {
+  refreshResponsesButton.addEventListener("click", () => {
+    if (responsesContainer) {
+      responsesContainer.innerHTML =
+        '<div class="empty-state">Loading responses...</div>';
+    }
+    loadResponses();
+  });
+}
+
+if (downloadResponsesButton) {
+  downloadResponsesButton.addEventListener("click", () => {
+    downloadResponsesButton.disabled = true;
+    downloadResponsesButton.textContent = "Downloading...";
+    downloadResponses().finally(() => {
+      downloadResponsesButton.disabled = false;
+      downloadResponsesButton.textContent = "Download JSON";
+    });
+  });
+}
 
 loadQuestionnaire();
 
@@ -336,6 +363,40 @@ function normalizeQuestionnaire(questionnaire) {
     title: questionnaire.title || "GKK Capability Diagnostic",
     sections,
   };
+}
+
+async function openResponsesModal() {
+  if (!responsesModal) {
+    return;
+  }
+  responsesModal.showModal();
+  responsesContainer.innerHTML =
+    '<div class="empty-state">Loading responses...</div>';
+  await loadResponses(true);
+}
+
+async function loadResponses(suppressEmptyToast = false) {
+  try {
+    const payload = await fetchResponses();
+    responsesCache = payload.responses || [];
+    renderResponses(responsesCache);
+    if (!responsesCache.length && !suppressEmptyToast) {
+      showToast("No responses available yet.");
+    }
+  } catch (error) {
+    console.error(error);
+    responsesContainer.innerHTML =
+      '<div class="empty-state">Unable to load responses right now.</div>';
+    showToast("Unable to load responses.", true);
+  }
+}
+
+async function fetchResponses() {
+  const response = await fetch("/api/responses");
+  if (!response.ok) {
+    throw new Error(`Failed to fetch responses (${response.status})`);
+  }
+  return response.json();
 }
 
 function handleBuilderClick(event) {
@@ -585,11 +646,7 @@ function loadSampleQuestionnaire() {
 
 async function downloadResponses() {
   try {
-    const response = await fetch("/api/responses");
-    if (!response.ok) {
-      throw new Error("Unable to load responses");
-    }
-    const payload = await response.json();
+    const payload = await fetchResponses();
     const blob = new Blob([JSON.stringify(payload, null, 2)], {
       type: "application/json",
     });
@@ -661,6 +718,95 @@ function collectOptions() {
 function render() {
   renderSections();
   renderPreview();
+  if (responsesContainer) {
+    renderResponses(responsesCache);
+  }
+}
+
+function renderResponses(responses) {
+  if (!responsesContainer) {
+    return;
+  }
+
+  if (!responses.length) {
+    responsesContainer.innerHTML =
+      '<div class="empty-state">No responses yet.</div>';
+    return;
+  }
+
+  responsesContainer.innerHTML = responses
+    .map((record, index) => {
+      const payload = record.payload || {};
+      const respondent = payload.respondent || {};
+      const answers = payload.answers || [];
+      const submittedAt = payload.submitted_at || record.submitted_at;
+      const company = respondent.companyName
+        ? escapeHtml(respondent.companyName)
+        : `Response ${index + 1}`;
+      const industry = respondent.industry
+        ? `<span class="response-chip">${escapeHtml(respondent.industry)}</span>`
+        : "";
+      const contactParts = [];
+      if (respondent.respondentName) {
+        contactParts.push(escapeHtml(respondent.respondentName));
+      }
+      if (respondent.respondentEmail) {
+        contactParts.push(escapeHtml(respondent.respondentEmail));
+      }
+      if (respondent.respondentPhone) {
+        contactParts.push(escapeHtml(respondent.respondentPhone));
+      }
+      const contactLine =
+        contactParts.join(" • ") || "No contact details provided";
+
+      const answersMarkup = answers
+        .map((answer) => {
+          const selections = (answer.selected || []).map(
+            (option) => `
+              <li>
+                <strong>${escapeHtml(option.label)}.</strong>
+                <span>${escapeHtml(option.description)}</span>
+              </li>
+            `
+          );
+
+          return `
+            <article class="response-answer">
+              <h5>${escapeHtml(answer.prompt || "Question")}</h5>
+              <ul>
+                ${
+                  selections.length
+                    ? selections.join("")
+                    : "<li>No selection provided.</li>"
+                }
+              </ul>
+            </article>
+          `;
+        })
+        .join("");
+
+      return `
+        <article class="response-card">
+          <header class="response-card-header">
+            <div>
+              <h4>${company}</h4>
+              <p>${contactLine}</p>
+            </div>
+            <div class="response-card-meta">
+              ${industry}
+              <span>${formatDateTime(submittedAt)}</span>
+            </div>
+          </header>
+          <div class="response-answers">
+            ${
+              answersMarkup ||
+              '<div class="empty-state">No answers recorded for this submission.</div>'
+            }
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderSections() {
@@ -913,4 +1059,15 @@ function roman(value) {
   });
 
   return result || value;
+}
+
+function formatDateTime(value) {
+  if (!value) {
+    return "Unknown time";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return escapeHtml(String(value));
+  }
+  return escapeHtml(date.toLocaleString());
 }

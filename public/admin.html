@@ -33,7 +33,7 @@
         </div>
         <div class="top-actions">
           <button id="viewResponses" class="ghost-btn">
-            Download Responses
+            View Responses
           </button>
           <button id="exportJson" class="ghost-btn">Export JSON</button>
           <button id="loadSample" class="ghost-btn">Load Sample</button>
@@ -140,6 +140,22 @@
         <menu class="modal-actions">
           <button type="submit" class="primary-btn">Close</button>
         </menu>
+      </form>
+    </dialog>
+
+    <dialog id="responsesModal" class="modal modal--wide">
+      <form method="dialog" class="modal-body">
+        <div class="modal-header modal-header--tight">
+          <h3>Collected Responses</h3>
+          <div class="modal-header-actions">
+            <button type="button" class="ghost-btn" id="refreshResponses">Refresh</button>
+            <button type="button" class="ghost-btn" id="downloadResponses">Download JSON</button>
+            <button type="button" class="icon-btn" data-close-modal>&times;</button>
+          </div>
+        </div>
+        <div id="responsesContainer" class="responses-container">
+          <div class="empty-state">No responses yet.</div>
+        </div>
       </form>
     </dialog>
 
