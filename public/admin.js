@@ -370,8 +370,10 @@ async function openResponsesModal() {
     return;
   }
   responsesModal.showModal();
-  responsesContainer.innerHTML =
-    '<div class="empty-state">Loading responses...</div>';
+  if (responsesContainer) {
+    responsesContainer.innerHTML =
+      '<div class="empty-state">Loading responses...</div>';
+  }
   await loadResponses(true);
 }
 
@@ -385,8 +387,10 @@ async function loadResponses(suppressEmptyToast = false) {
     }
   } catch (error) {
     console.error(error);
-    responsesContainer.innerHTML =
-      '<div class="empty-state">Unable to load responses right now.</div>';
+    if (responsesContainer) {
+      responsesContainer.innerHTML =
+        '<div class="empty-state">Unable to load responses right now.</div>';
+    }
     showToast("Unable to load responses.", true);
   }
 }
